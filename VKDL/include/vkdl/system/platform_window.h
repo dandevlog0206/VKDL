@@ -1,7 +1,9 @@
 #pragma once
 
 #include <string>
-#include "../system/event_msg.h"
+#include "../core/render_target.h"
+#include "../core/render_options.h"
+#include "../system/window_event.h"
 #include "../math/vector_type.h"
 #include "../util/property.hpp"
 #include "../util/event.hpp"
@@ -14,7 +16,7 @@ struct PlatformWindowImpl;
 
 VKDL_PRIV_END
 
-typedef Event<PlatformWindow&, EventMsg&> PlatformWindowEventMsgHandler;
+typedef Event<PlatformWindow&, WindowEvent&> PlatformWindowEventMsgHandler;
 
 enum class PlatformWindowStyle
 {
@@ -38,30 +40,41 @@ enum class PlatformWindowState
 
 typedef Flags<PlatformWindowStyle> PlatformWindowStyleFlags;
 
-class PlatformWindow
+class PlatformWindow : protected RenderTarget
 {
 	PROPERTY_INIT(PlatformWindow);
 	VKDL_NOCOPY(PlatformWindow);
+	VKDL_NOMOVE(PlatformWindow);
 	VKDL_NOCOPYASS(PlatformWindow);
+	VKDL_NOMOVEASS(PlatformWindow);
 
 public:
 	PlatformWindow();
-	PlatformWindow(PlatformWindow&& rhs);
 	PlatformWindow(uint32_t width, uint32_t height, const char* title, PlatformWindowStyleFlags style = PlatformWindowStyle::Default);
 	PlatformWindow(uint32_t width, uint32_t height, const char* title, PlatformWindow* parent, PlatformWindowStyleFlags style = PlatformWindowStyle::Default);
 	~PlatformWindow();
-
-	PlatformWindow& operator=(PlatformWindow&& rhs);
 
 	void create(uint32_t width, uint32_t height, const char* title, PlatformWindowStyleFlags style = PlatformWindowStyle::Default);
 	void create(uint32_t width, uint32_t height, const char* title, PlatformWindow* parent, PlatformWindowStyleFlags style = PlatformWindowStyle::Default);
 	void destroy();
 
 	void processEvent(bool block = false);
-	bool pollEvent(EventMsg& event);
-	bool waitEvent(EventMsg& event);
+	bool pollEvent(WindowEvent& event);
+	void waitEvent(WindowEvent& event);
 	bool hasEvent() const;
 
+	bool checkPresentModeCompability(vk::PresentModeKHR mode) const;
+
+	void render(const Drawable& drawable, const RenderOptions& options = {}) override;
+	void display() override;
+	void clear(const Color& color = Colors::Black) override;
+
+private:
+	vk::CommandBuffer getCommandBuffer() override;
+	vk::Framebuffer getFrameBuffer() override;
+	uvec2 getFrameBufferSize() const override;
+
+public:
 	PROPERTY {
 		PROPERTY_GET_SET(ivec2,               Position);
 		PROPERTY_GET_SET(uvec2,               Size);
@@ -69,19 +82,19 @@ public:
 		PROPERTY_GET_SET(uvec2,               MinSizeLimit);
 		PROPERTY_GET_SET(uvec2,               MaxSizeLimit);
 		PROPERTY_GET_SET(std::string,         Title);
+		PROPERTY_GET_SET(vk::PresentModeKHR,  PresentMode);
 		PROPERTY_GET_SET(PlatformWindowState, WindowState);
 		PROPERTY_GET_SET(float,               Transparency);
 		PROPERTY_GET_SET(bool,                Visible);
 		PROPERTY_GET_SET(bool,                Focussed);
 		PROPERTY_GET_SET(bool,                Resizable);
-		PROPERTY_GET_SET(bool,                VSync);
 		PROPERTY_GET_SET(PlatformWindow*,     Parent);
 		PROPERTY_GET(bool,                    IsClosed);
 		PROPERTY_GET(bool,                    IsDestroyed);
 		PROPERTY_GET_SET(void*,               UserPtr);
 	};
 
-	PlatformWindowEventMsgHandler OnEventMsgRecieved;
+	PlatformWindowEventMsgHandler OnEventRecieved;
 
 	void* getNativeHandle() const;
 
@@ -98,6 +111,8 @@ private:
 	PROPERTY_DECL_SET(MaxSizeLimit);
 	PROPERTY_DECL_GET(Title);
 	PROPERTY_DECL_SET(Title);
+	PROPERTY_DECL_GET(PresentMode);
+	PROPERTY_DECL_SET(PresentMode);
 	PROPERTY_DECL_GET(WindowState);
 	PROPERTY_DECL_SET(WindowState);
 	PROPERTY_DECL_GET(Transparency);
@@ -108,8 +123,6 @@ private:
 	PROPERTY_DECL_SET(Focussed);
 	PROPERTY_DECL_GET(Resizable);
 	PROPERTY_DECL_SET(Resizable);
-	PROPERTY_DECL_GET(VSync);
-	PROPERTY_DECL_SET(VSync);
 	PROPERTY_DECL_GET(Parent);
 	PROPERTY_DECL_SET(Parent);
 	PROPERTY_DECL_GET(IsClosed);

@@ -48,13 +48,13 @@
     <ClInclude Include="include\vkdl\core\include_vulkan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\vkdl\pipeline_builder.h">
+    <ClInclude Include="include\vkdl\builder\pipeline_builder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platforms\platform_window_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\vkdl\system\event_msg.h">
+    <ClInclude Include="include\vkdl\system\window_event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vkdl\system\mouse.h">
@@ -75,6 +75,90 @@
     <ClInclude Include="src\platforms\windows_cursor_impl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\platforms\windows_keyboard_impl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platforms\windows_mouse_impl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\shader_module.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\descriptor_set.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\builder\pipeline_layout_builder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\pipeline_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\builder\descriptor_set_layout_builder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\descriptor_set_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\renderpass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\builder\renderpass_builder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\vertex_list_2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\render_target.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\util\uuid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\drawlist_2d.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\math\transform_2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\util\radian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\drawable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\render_options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\texture_view.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\builtin_objects.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\render_states.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\transformable_2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\platforms\platform_window.cpp">
@@ -83,19 +167,67 @@
     <ClCompile Include="src\platforms\keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platforms\windows_keyboard_impl.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\platforms\mouse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platforms\windows_mouse_impl.h">
+    <ClCompile Include="src\platforms\cursor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platforms\cursor.cpp">
+    <ClCompile Include="src\shader_module.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipeline_builder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipeline_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipeline_layout_builder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\descriptor_set_layout_builder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\descriptor_set_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderpass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderpass_builder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\drawlist_2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\transform_2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\drawable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\builtin_objects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_states.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture_view.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

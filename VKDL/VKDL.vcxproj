@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,15 +19,35 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\vkdl\core\buffer.h" />
+    <ClInclude Include="include\vkdl\builder\pipeline_layout_builder.h" />
+    <ClInclude Include="include\vkdl\core\render_states.h" />
+    <ClInclude Include="include\vkdl\core\render_options.h" />
+    <ClInclude Include="include\vkdl\core\render_target.h" />
+    <ClInclude Include="include\vkdl\graphics\color.h" />
     <ClInclude Include="include\vkdl\core\config.h" />
     <ClInclude Include="include\vkdl\core\context.h" />
     <ClInclude Include="include\vkdl\core\exception.h" />
     <ClInclude Include="include\vkdl\core\include_vulkan.h" />
+    <ClInclude Include="include\vkdl\core\descriptor_set.h" />
+    <ClInclude Include="include\vkdl\core\descriptor_set_layout.h" />
+    <ClInclude Include="include\vkdl\core\drawable.h" />
+    <ClInclude Include="include\vkdl\graphics\image.h" />
+    <ClInclude Include="include\vkdl\graphics\texture.h" />
+    <ClInclude Include="include\vkdl\graphics\transformable_2d.h" />
+    <ClInclude Include="include\vkdl\graphics\vertex_list_2d.h" />
     <ClInclude Include="include\vkdl\math\rect.h" />
+    <ClInclude Include="include\vkdl\math\transform_2d.h" />
     <ClInclude Include="include\vkdl\math\vector_type.h" />
-    <ClInclude Include="include\vkdl\pipeline_builder.h" />
+    <ClInclude Include="include\vkdl\core\pipeline.h" />
+    <ClInclude Include="include\vkdl\builder\pipeline_builder.h" />
+    <ClInclude Include="include\vkdl\core\pipeline_layout.h" />
+    <ClInclude Include="include\vkdl\core\renderpass.h" />
+    <ClInclude Include="include\vkdl\core\shader_module.h" />
     <ClInclude Include="include\vkdl\system\cursor.h" />
-    <ClInclude Include="include\vkdl\system\event_msg.h" />
+    <ClInclude Include="include\vkdl\util\radian.h" />
+    <ClInclude Include="include\vkdl\util\uuid.h" />
+    <ClInclude Include="include\vkdl\system\window_event.h" />
     <ClInclude Include="include\vkdl\system\keyboard.h" />
     <ClInclude Include="include\vkdl\system\mouse.h" />
     <ClInclude Include="include\vkdl\util\delegate.hpp" />
@@ -35,19 +55,43 @@
     <ClInclude Include="include\vkdl\util\flags.h" />
     <ClInclude Include="include\vkdl\system\platform_window.h" />
     <ClInclude Include="include\vkdl\util\property.hpp" />
+    <ClInclude Include="include\vkdl\graphics\vertex.h" />
     <ClInclude Include="include\vkdl\VKDL.hpp" />
     <ClInclude Include="src\platforms\platform_window_base.h" />
     <ClInclude Include="src\platforms\windows_cursor_impl.h" />
     <ClInclude Include="src\platforms\windows_platform_window_impl.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\vkdl\graphics\texture_view.h" />
+    <ClInclude Include="include\vkdl\core\builtin_objects.h" />
+    <ClCompile Include="src\builtin_objects.cpp" />
+    <ClCompile Include="src\image.cpp" />
+    <ClCompile Include="src\render_states.cpp" />
+    <ClCompile Include="src\render_options.cpp" />
+    <ClCompile Include="src\drawable.cpp" />
+    <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\texture_view.cpp" />
+    <ClCompile Include="src\transform_2d.cpp" />
+    <ClInclude Include="include\vkdl\builder\descriptor_set_layout_builder.h" />
+    <ClInclude Include="include\vkdl\builder\renderpass_builder.h" />
+    <ClInclude Include="include\vkdl\graphics\drawlist_2d.h" />
+    <ClCompile Include="src\drawlist_2d.cpp" />
+    <ClCompile Include="src\pipeline.cpp" />
+    <ClCompile Include="src\descriptor_set_layout.cpp" />
+    <ClCompile Include="src\descriptor_set_layout_builder.cpp" />
+    <ClCompile Include="src\pipeline_builder.cpp" />
+    <ClCompile Include="src\pipeline_layout.cpp" />
+    <ClCompile Include="src\pipeline_layout_builder.cpp" />
+    <ClCompile Include="src\renderpass.cpp" />
+    <ClCompile Include="src\renderpass_builder.cpp" />
+    <ClCompile Include="src\shader_module.cpp" />
     <ClCompile Include="src\context.cpp" />
     <ClCompile Include="src\platforms\cursor.cpp" />
     <ClCompile Include="src\platforms\keyboard.cpp" />
     <ClCompile Include="src\platforms\mouse.cpp" />
     <ClCompile Include="src\platforms\platform_window.cpp" />
-    <ClCompile Include="src\platforms\windows_keyboard_impl.h" />
-    <ClCompile Include="src\platforms\windows_mouse_impl.h" />
+    <ClInclude Include="src\platforms\windows_keyboard_impl.h" />
+    <ClInclude Include="src\platforms\windows_mouse_impl.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -26,6 +26,8 @@
 #define VKDL_INLINE inline
 #define VKDL_NOEXCEPT noexcept
 
+#define VKDL_NODISCARD [[nodiscard]]
+
 #define VKDL_NAMESPACE_NAME vkdl
 #define VKDL_PRIV_NAMESPACE_NAME priv
 
