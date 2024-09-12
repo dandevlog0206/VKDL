@@ -20,15 +20,15 @@ typedef Event<PlatformWindow&, WindowEvent&> PlatformWindowEventMsgHandler;
 
 enum class PlatformWindowStyle
 {
-	None      = 0,
+	None = 0,
 	Resizable = 1 << 0,
-	TopMost   = 1 << 1,
-	Visible   = 1 << 2,
-	Minimize  = 1 << 3,
-	Maximize  = 1 << 4,
-	Close     = 1 << 5,
-	Titlebar  = Minimize | Maximize | Close,
-	Default   = Titlebar | Resizable | Visible
+	TopMost = 1 << 1,
+	Visible = 1 << 2,
+	Minimize = 1 << 3,
+	Maximize = 1 << 4,
+	Close = 1 << 5,
+	Titlebar = Minimize | Maximize | Close,
+	Default = Titlebar | Resizable | Visible
 };
 
 enum class PlatformWindowState
@@ -56,6 +56,7 @@ public:
 
 	void create(uint32_t width, uint32_t height, const char* title, PlatformWindowStyleFlags style = PlatformWindowStyle::Default);
 	void create(uint32_t width, uint32_t height, const char* title, PlatformWindow* parent, PlatformWindowStyleFlags style = PlatformWindowStyle::Default);
+	void close();
 	void destroy();
 
 	void processEvent(bool block = false);
@@ -73,9 +74,10 @@ private:
 	vk::CommandBuffer getCommandBuffer() override;
 	vk::Framebuffer getFrameBuffer() override;
 	uvec2 getFrameBufferSize() const override;
+	vk::ClearColorValue getClearColorValue() const override;
 
 public:
-	PROPERTY {
+	PROPERTY{
 		PROPERTY_GET_SET(ivec2,               Position);
 		PROPERTY_GET_SET(uvec2,               Size);
 		PROPERTY_GET_SET(uvec2,               FrameBufferSize);
@@ -85,6 +87,7 @@ public:
 		PROPERTY_GET_SET(vk::PresentModeKHR,  PresentMode);
 		PROPERTY_GET_SET(PlatformWindowState, WindowState);
 		PROPERTY_GET_SET(float,               Transparency);
+		PROPERTY_GET_SET(Color,               ClearColor);
 		PROPERTY_GET_SET(bool,                Visible);
 		PROPERTY_GET_SET(bool,                Focussed);
 		PROPERTY_GET_SET(bool,                Resizable);
@@ -117,6 +120,8 @@ private:
 	PROPERTY_DECL_SET(WindowState);
 	PROPERTY_DECL_GET(Transparency);
 	PROPERTY_DECL_SET(Transparency);
+	PROPERTY_DECL_GET(ClearColor);
+	PROPERTY_DECL_SET(ClearColor);
 	PROPERTY_DECL_GET(Visible);
 	PROPERTY_DECL_SET(Visible);
 	PROPERTY_DECL_GET(Focussed);

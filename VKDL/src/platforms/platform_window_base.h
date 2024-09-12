@@ -42,11 +42,13 @@ struct PlatformWindowBase
 		minimized(false),
 		maximized(false),
 		focussed(false),
+		closed(false),
 		surface(nullptr),
 		swapchain(nullptr),
 		present_queue_family_idx(~0),
 		present_mode(vk::PresentModeKHR::eFifo),
 		image_format(vk::Format::eR8G8B8A8Unorm),
+		clear_color(0, 0, 0, 255),
 		frame_idx(0),
 		semaphore_idx(0),
 		platform_window(nullptr),
@@ -69,6 +71,7 @@ struct PlatformWindowBase
 	bool        minimized;
 	bool        maximized;
 	bool        focussed;
+	bool        closed;
 
 	vk::SurfaceKHR                    surface;
 	vk::SwapchainKHR                  swapchain;
@@ -78,17 +81,18 @@ struct PlatformWindowBase
 	std::vector<vk::PresentModeKHR>   present_modes;
 	vk::PresentModeKHR                present_mode;
 	vk::Format                        image_format;
-	
+	vk::ClearColorValue               clear_color;
+
 	std::vector<WindowFrame>    frames;
 	std::vector<FrameSemaphore> semaphores;
 	std::queue<WindowEvent>     events;
-	
+
 	uint32_t frame_idx;
 	uint32_t semaphore_idx;
 
 	PlatformWindow* platform_window;
 	PlatformWindow* parent;
-	
+
 	ivec2 mouse_prev;
 	bool  update_swapchain;
 	bool  render_begin;
@@ -106,8 +110,8 @@ struct PlatformWindowBase
 			}
 		}
 
-		capabilities  = ctx.physical_device.getSurfaceCapabilitiesKHR(surface);
-		formats       = ctx.physical_device.getSurfaceFormatsKHR(surface);
+		capabilities = ctx.physical_device.getSurfaceCapabilitiesKHR(surface);
+		formats = ctx.physical_device.getSurfaceFormatsKHR(surface);
 		present_modes = ctx.physical_device.getSurfacePresentModesKHR(surface);
 
 		registerBuiltinRenderpass(VKDL_BUILTIN_RENDERPASS0_UUID);
@@ -116,7 +120,7 @@ struct PlatformWindowBase
 
 	void destroy()
 	{
-		auto& ctx    = Context::get();
+		auto& ctx = Context::get();
 		auto& device = ctx.device;
 
 		device.waitIdle();
@@ -140,7 +144,7 @@ struct PlatformWindowBase
 
 	void recreate_swapchain()
 	{
-		auto& ctx    = Context::get();
+		auto& ctx = Context::get();
 		auto& device = ctx.device;
 
 		device.waitIdle();
@@ -149,7 +153,7 @@ struct PlatformWindowBase
 
 		capabilities = ctx.physical_device.getSurfaceCapabilitiesKHR(surface);
 
-		auto extent        = capabilities.currentExtent;
+		auto extent = capabilities.currentExtent;
 		auto old_swapchain = swapchain;
 
 		if (extent.width == 0 || extent.height == 0) return;
@@ -177,13 +181,14 @@ struct PlatformWindowBase
 		};
 
 		if (ctx.graphics_queue_family_idx == present_queue_family_idx) {
-			swapchain_info.imageSharingMode      = vk::SharingMode::eExclusive;
+			swapchain_info.imageSharingMode = vk::SharingMode::eExclusive;
 			swapchain_info.queueFamilyIndexCount = 0;
-			swapchain_info.pQueueFamilyIndices   = nullptr;
-		} else {
-			swapchain_info.imageSharingMode      = vk::SharingMode::eConcurrent;
+			swapchain_info.pQueueFamilyIndices = nullptr;
+		}
+		else {
+			swapchain_info.imageSharingMode = vk::SharingMode::eConcurrent;
 			swapchain_info.queueFamilyIndexCount = 2;
-			swapchain_info.pQueueFamilyIndices   = queue_families;
+			swapchain_info.pQueueFamilyIndices = queue_families;
 		}
 
 		swapchain = ctx.device.createSwapchainKHR(swapchain_info);
@@ -220,10 +225,11 @@ struct PlatformWindowBase
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
 			return capabilities.currentExtent;
-		} else {
+		}
+		else {
 			vk::Extent2D actualExtent{ size.x, size.y };
 
-			actualExtent.width  = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
 			return actualExtent;
@@ -242,7 +248,7 @@ struct PlatformWindowBase
 
 	void create_window_frame()
 	{
-		auto& ctx    = Context::get();
+		auto& ctx = Context::get();
 		auto& device = ctx.device;
 
 		auto images = device.getSwapchainImagesKHR(swapchain);
@@ -272,7 +278,7 @@ struct PlatformWindowBase
 				ctx.render_passes[VKDL_BUILTIN_RENDERPASS0_UUID]->get(),
 				1, &image_view,
 				capabilities.currentExtent.width,
-				capabilities.currentExtent.height, 
+				capabilities.currentExtent.height,
 				1,
 			};
 
@@ -292,12 +298,12 @@ struct PlatformWindowBase
 			};
 
 			WindowFrame frame;
-			frame.image        = image;
-			frame.image_view   = image_view;
+			frame.image = image;
+			frame.image_view = image_view;
 			frame.frame_buffer = device.createFramebuffer(frame_buffer_info);
-			frame.cmd_pool     = command_pool;
-			frame.cmd_buffer   = device.allocateCommandBuffers(command_buffer_info).front();
-			frame.fence        = device.createFence(fence_info);
+			frame.cmd_pool = command_pool;
+			frame.cmd_buffer = device.allocateCommandBuffers(command_buffer_info).front();
+			frame.fence = device.createFence(fence_info);
 
 			frames.push_back(frame);
 		}
@@ -310,7 +316,7 @@ struct PlatformWindowBase
 		for (int i = 0; i < frames.size(); ++i) {
 			FrameSemaphore semaphore;
 
-			semaphore.image_acquired  = device.createSemaphore({});
+			semaphore.image_acquired = device.createSemaphore({});
 			semaphore.render_complete = device.createSemaphore({});
 
 			semaphores.emplace_back(semaphore);

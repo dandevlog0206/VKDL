@@ -62,7 +62,7 @@ void RenderStates::bind(RenderTarget& target, const RenderOptions& options)
 		auto fb_size = target.getFrameBufferSize();
 
 		vk::ClearValue clear_value = {};
-		clear_value.color = vk::ClearColorValue{ 0.f, 0.f, 0.f, 0.f };
+		clear_value.color = target.getClearColorValue();
 
 		vk::RenderPassBeginInfo image_info = {};
 		image_info.renderPass      = ctx.getRenderpass(renderpass_uuid.value);

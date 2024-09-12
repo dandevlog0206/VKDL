@@ -6,15 +6,33 @@
 VKDL_BEGIN
 
 class Texture;
+class Font;
+class Glyph;
+
+struct TextStyle
+{
+	const Font*  font                  = nullptr;
+	unsigned int character_size        = 30;
+	float        align_h               = 0.f;
+	float        align_v               = 1.f;
+	float        letter_spacing_factor = 1.f;
+	float        line_spacing_factor   = 1.f;
+	Color        fill_color            = Colors::White;
+
+	bool bold           = false;
+	bool italic         = false;
+	bool underline      = false;
+	bool strike_through = false;
+};
 
 struct DrawCommand2D
 {
 public:
 	DrawCommand2D();
 
-	vk::DescriptorSet descriptor_set;
-	vk::Rect2D        clip_rect;
-	Transform2D       transform;
+	const Texture* texture;
+	vk::Rect2D     clip_rect;
+	Transform2D    transform;
 
 	uint32_t vertex_offset;
 	uint32_t vertex_count;
@@ -28,11 +46,18 @@ public:
 	DrawList2D();
 	
 	void addRawTriangle(const Vertex2D& v0, const Vertex2D& v1, const Vertex2D& v2);
+
+	void addDot(const vec2& p, float r, const Color& col);
+	void addLine(const vec2& p0, const vec2& p1, float width, const Color& col);
 	void addFilledTriangle(const vec2& p0, const vec2& p1, const vec2& p2, const Color& col);
 	
 	void addImage(const Texture& texture, const vec2& pos, const vec2& size, const vec2& uv0, const vec2& uv1, const Color& col = Colors::White);
 	void addImage(const vec2& pos, const vec2& size, const vec2& uv0, const vec2& uv1, const Color& col = Colors::White);
 	void addImageQuad(const vec2& p0, const vec2& p1, const vec2& p2, const vec2& p3, const vec2& uv0, const vec2& uv1, const vec2& uv2, const vec2& uv3, const Color& col = Colors::White);
+
+	void addText(const vec2& pos, const std::string& text, const TextStyle& style);
+	void addGlyphQuad(const vec2& pos, const Color& color, const Glyph& glyph, float italicShear);
+	void addTextLine(float length, float top, const Color& color, float offset, float thickness, float outlineThickness = 0);
 
 	void pushTexture(const Texture& texture);
 	void popTexture();

@@ -21,6 +21,7 @@ public:
 	virtual vk::CommandBuffer getCommandBuffer() = 0;
 	virtual vk::Framebuffer getFrameBuffer() = 0;
 	virtual uvec2 getFrameBufferSize() const = 0;
+	virtual vk::ClearColorValue getClearColorValue() const = 0;
 };
 
 VKDL_END

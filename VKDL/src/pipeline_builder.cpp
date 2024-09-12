@@ -218,7 +218,7 @@ PipelineBuilder& PipelineBuilder::setBlendConstants(float c0, float c1, float c2
 
 PipelineBuilder& PipelineBuilder::enableBlend()
 {
-	curr_blend_state.blendEnable;
+	curr_blend_state.blendEnable = true;
 	return *this;
 }
 

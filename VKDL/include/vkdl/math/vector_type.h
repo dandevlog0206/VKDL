@@ -9,6 +9,9 @@
 
 VKDL_BEGIN
 
+template <class T>
+using vec2_base = glm::vec<2, T, glm::defaultp>;
+
 typedef glm::vec2  vec2;
 typedef glm::ivec2 ivec2;
 typedef glm::uvec2 uvec2;

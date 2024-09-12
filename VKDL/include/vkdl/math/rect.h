@@ -24,65 +24,45 @@ struct RectBase {
 	RectBase(const RectBase&) = default;
 	RectBase(RectBase&&) = default;
 
-	RectBase(const T& left, const T& top, const T& width, const T& height) :
-		left(left),
-		top(top),
-		width(width),
-		height(height) {}
+	RectBase(const T& pos_x, const T& pos_y, const T& width, const T& height) :
+		position(pos_x, pos_y),
+		size(width, height) 
+	{}
 
 	RectBase(const vector_type& pos, const vector_type& size) :
-		left(pos.x),
-		top(pos.y),
-		width(size.x),
-		height(size.y) {}
+		position(pos),
+		size(size)
+	{}
 
 	template <class U>
 	RectBase(const RectBase<U>& rhs) VKDL_NOEXCEPT :
-	left(static_cast<T>(rhs.left)),
-		top(static_cast<T>(rhs.top)),
-		width(static_cast<T>(rhs.width)),
-		height(static_cast<T>(rhs.height)) {}
+	position(static_cast<T>(rhs.position.x), static_cast<T>(rhs.position.y)),
+	size(static_cast<T>(rhs.size.x), static_cast<T>(rhs.size.y))
+	{}
 
 	RectBase& operator=(const RectBase&) = default;
 	RectBase& operator=(RectBase&&) = default;
 
-	vector_type getPosition() const VKDL_NOEXCEPT {
-		return { left, top };
-	}
-
-	void setPosition(const vector_type& pos) VKDL_NOEXCEPT {
-		left = pos.x;
-		top = pos.y;
-	}
-
-	vector_type getSize() const VKDL_NOEXCEPT {
-		return { width, height };
-	}
-
-	void setSize(const vector_type& size) VKDL_NOEXCEPT {
-		width = size.x;
-		height = size.y;
-	}
-
-	vector_type center() const VKDL_NOEXCEPT {
+	vector_type center() const VKDL_NOEXCEPT
+	{
 		return {
-			left + width / static_cast<T>(2.f),
-			top + height / static_cast<T>(2.f),
+			position.x + size.x / static_cast<T>(2.f),
+			position.y + size.y / static_cast<T>(2.f),
 		};
 	}
 
-	float area() const VKDL_NOEXCEPT {
-		return width * height;
+	float area() const VKDL_NOEXCEPT
+	{
+		return size.x * size.y;
 	}
 
-	bool contain(const vector_type& pos) const VKDL_NOEXCEPT {
-		return left <= pos.x && pos.x <= left + width && top <= pos.y && pos.y <= top + height;
+	bool contain(const vector_type& pos) const VKDL_NOEXCEPT
+	{
+		return position.x <= pos.x && pos.x <= position.x + size.x && position.y <= pos.y && pos.y <= position.y + size.y;
 	}
 
-	T left;
-	T top;
-	T width;
-	T height;
+	vec2_base<T> position;
+	vec2_base<T> size;
 };
 
 using rect  = RectBase<float>;

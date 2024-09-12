@@ -326,8 +326,8 @@ void PlatformWindow::create(uint32_t width, uint32_t height, const char* title, 
 
 	auto window_rect = get_window_rect(impl->hwnd);
 
-	impl->position          = window_rect.getPosition();
-	impl->size              = window_rect.getSize();
+	impl->position          = window_rect.position;
+	impl->size              = window_rect.size;
 	impl->frame_buffer_size = { width, height };
 	impl->title             = title;
 
@@ -341,6 +341,11 @@ void PlatformWindow::create(uint32_t width, uint32_t height, const char* title, 
 
 	impl->surface = ctx.instance.createWin32SurfaceKHR(image_info);
 	impl->init();
+}
+
+void PlatformWindow::close()
+{
+	impl->closed = true;
 }
 
 void PlatformWindow::destroy()
@@ -518,6 +523,25 @@ PROPERTY_IMPL_SET(PlatformWindow, Transparency)
 	SetLayeredWindowAttributes(impl->hwnd, 0, (BYTE)(255.99f * value), LWA_ALPHA);
 }
 
+PROPERTY_IMPL_GET(PlatformWindow, ClearColor)
+{
+	Color color;
+	color.r = (uint8_t)(impl->clear_color.float32[0] * 255.99f);
+	color.g = (uint8_t)(impl->clear_color.float32[1] * 255.99f);
+	color.b = (uint8_t)(impl->clear_color.float32[2] * 255.99f);
+	color.a = (uint8_t)(impl->clear_color.float32[3] * 255.99f);
+
+	return color;
+}
+
+PROPERTY_IMPL_SET(PlatformWindow, ClearColor)
+{
+	impl->clear_color.float32[0] = (float)value.r / 255.f;
+	impl->clear_color.float32[1] = (float)value.g / 255.f;
+	impl->clear_color.float32[2] = (float)value.b / 255.f;
+	impl->clear_color.float32[3] = (float)value.a / 255.f;
+}
+
 PROPERTY_IMPL_GET(PlatformWindow, Visible)
 {
 	return impl->visible;
@@ -575,7 +599,7 @@ PROPERTY_IMPL_SET(PlatformWindow, Parent)
 
 PROPERTY_IMPL_GET(PlatformWindow, IsClosed)
 {
-	return false;
+	return impl->closed;
 }
 
 PROPERTY_IMPL_GET(PlatformWindow, IsDestroyed)
@@ -618,8 +642,8 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		return 0;
 	}
 	case WM_SIZE: {
-		uvec2 size    = get_window_rect(hwnd).getSize();
-		uvec2 fb_size = get_client_rect(hwnd).getSize();
+		uvec2 size    = get_window_rect(hwnd).size;
+		uvec2 fb_size = get_client_rect(hwnd).size;
 
 		if (impl->enter_sizemove && !impl->is_resizing) {
 			WindowEvent e{ WindowEvent::EnterResize };

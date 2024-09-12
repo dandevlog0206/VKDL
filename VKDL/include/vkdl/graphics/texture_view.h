@@ -12,13 +12,13 @@ class TextureView : public Transformable2D, public Drawable
 public:
 	TextureView();
 	TextureView(const Texture& texture);
+	TextureView(const Texture& texture, const vec2& offset, const vec2& size);
 
 	PROPERTY{
-		PROPERTY_DEFAULT_GET_SET(Texture*, TexturePtr);
+		PROPERTY_DEFAULT_GET_SET(const Texture*, TexturePtr);
 		PROPERTY_DEFAULT_GET_SET(vec2, Offset);
 		PROPERTY_DEFAULT_GET_SET(vec2, Size);
-		PROPERTY_DEFAULT_GET_SET(vec2, UV0);
-		PROPERTY_DEFAULT_GET_SET(vec2, UV1);
+		PROPERTY_DEFAULT_GET_SET(Color, FilledColor);
 	};
 
 	bool empty() const;

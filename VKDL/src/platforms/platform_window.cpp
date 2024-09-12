@@ -109,4 +109,9 @@ uvec2 PlatformWindow::getFrameBufferSize() const
 	return impl->frame_buffer_size;
 }
 
+vk::ClearColorValue PlatformWindow::getClearColorValue() const
+{
+	return impl->clear_color;
+}
+
 VKDL_END

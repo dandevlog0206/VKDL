@@ -75,12 +75,6 @@
     <ClInclude Include="src\platforms\windows_cursor_impl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\platforms\windows_keyboard_impl.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platforms\windows_mouse_impl.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\vkdl\core\shader_module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -96,17 +90,11 @@
     <ClInclude Include="include\vkdl\core\pipeline_layout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\vkdl\builder\descriptor_set_layout_builder.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\vkdl\core\descriptor_set_layout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vkdl\core\renderpass.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\vkdl\builder\renderpass_builder.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vkdl\core\buffer.h">
       <Filter>Header Files</Filter>
@@ -126,9 +114,6 @@
     <ClInclude Include="include\vkdl\util\uuid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\vkdl\graphics\drawlist_2d.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\vkdl\math\transform_2d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -144,19 +129,40 @@
     <ClInclude Include="include\vkdl\graphics\texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\vkdl\graphics\texture_view.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\vkdl\graphics\image.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\vkdl\core\builtin_objects.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vkdl\core\render_states.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vkdl\graphics\transformable_2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\drawlist_2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platforms\windows_mouse_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platforms\windows_keyboard_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\texture_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\builder\renderpass_builder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\builder\descriptor_set_layout_builder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\core\builtin_objects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\font.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vkdl\graphics\glyph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -209,9 +215,6 @@
     <ClCompile Include="src\transform_2d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\drawable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_options.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -228,6 +231,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\texture_view.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

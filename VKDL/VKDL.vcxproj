@@ -32,6 +32,8 @@
     <ClInclude Include="include\vkdl\core\descriptor_set.h" />
     <ClInclude Include="include\vkdl\core\descriptor_set_layout.h" />
     <ClInclude Include="include\vkdl\core\drawable.h" />
+    <ClInclude Include="include\vkdl\graphics\font.h" />
+    <ClInclude Include="include\vkdl\graphics\glyph.h" />
     <ClInclude Include="include\vkdl\graphics\image.h" />
     <ClInclude Include="include\vkdl\graphics\texture.h" />
     <ClInclude Include="include\vkdl\graphics\transformable_2d.h" />
@@ -65,10 +67,10 @@
     <ClInclude Include="include\vkdl\graphics\texture_view.h" />
     <ClInclude Include="include\vkdl\core\builtin_objects.h" />
     <ClCompile Include="src\builtin_objects.cpp" />
+    <ClCompile Include="src\font.cpp" />
     <ClCompile Include="src\image.cpp" />
     <ClCompile Include="src\render_states.cpp" />
     <ClCompile Include="src\render_options.cpp" />
-    <ClCompile Include="src\drawable.cpp" />
     <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\texture_view.cpp" />
     <ClCompile Include="src\transform_2d.cpp" />
@@ -185,7 +187,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(ProjectDir)..\thirdparty\freetype-windows-binaries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -201,7 +203,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(ProjectDir)..\thirdparty\freetype-windows-binaries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

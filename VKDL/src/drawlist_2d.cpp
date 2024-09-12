@@ -5,10 +5,12 @@
 #include "../include/vkdl/core/render_states.h"
 #include "../include/vkdl/core/builtin_objects.h"
 #include "../include/vkdl/graphics/texture.h"
+#include "../include/vkdl/graphics/font.h"
 
 VKDL_BEGIN
 
 DrawCommand2D::DrawCommand2D() :
+	texture(nullptr),
 	vertex_offset(0),
 	vertex_count(0),
 	index_offset(0),
@@ -17,9 +19,8 @@ DrawCommand2D::DrawCommand2D() :
 }
 
 DrawList2D::DrawList2D() :
-	Drawable(VKDL_BUILTIN_RENDERPASS0_UUID, VKDL_BUILTIN_PIPELINE0_UUID),
-	vertex_buffer(vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostVisible),
-	index_buffer(vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eHostVisible),
+	vertex_buffer(Buffer<Vertex2D>::createVertexBuffer(0)),
+	index_buffer(Buffer<uint32_t>::createIndexBuffer(0)),
 	update_buffer(false)
 {
 	registerBuiltinPipeline(VKDL_BUILTIN_PIPELINE0_UUID);
@@ -39,6 +40,45 @@ void DrawList2D::addRawTriangle(const Vertex2D& v0, const Vertex2D& v1, const Ve
 	indices.emplace_back(idx + 0);
 	indices.emplace_back(idx + 1);
 	indices.emplace_back(idx + 2);
+}
+
+void DrawList2D::addDot(const vec2& p, float r, const Color& col)
+{
+	r = 0.5f * std::abs(r);
+
+	auto idx = reservePrimitives(4, 6);
+
+	vertices.emplace_back(p + vec2(-r, -r), col);
+	vertices.emplace_back(p + vec2(+r, -r), col);
+	vertices.emplace_back(p + vec2(+r, +r), col);
+	vertices.emplace_back(p + vec2(-r, +r), col);
+
+	indices.emplace_back(idx + 0);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 3);
+	indices.emplace_back(idx + 0);
+}
+
+void DrawList2D::addLine(const vec2& p0, const vec2& p1, float width, const Color& col)
+{
+	auto idx = reservePrimitives(4, 6);
+
+	auto v0 = glm::normalize(p1 - p0);
+	auto v1 = vec2(-v0.y, v0.x);
+
+	vertices.emplace_back(p0 + v1 * width - v0 * width, col);
+	vertices.emplace_back(p0 - v1 * width - v0 * width, col);
+	vertices.emplace_back(p1 + v1 * width + v0 * width, col);
+	vertices.emplace_back(p1 - v1 * width + v0 * width, col);
+
+	indices.emplace_back(idx + 0);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 3);
 }
 
 void DrawList2D::addFilledTriangle(const vec2& p0, const vec2& p1, const vec2& p2, const Color& col)
@@ -95,15 +135,152 @@ void DrawList2D::addImageQuad(const vec2& p0, const vec2& p1, const vec2& p2, co
 	indices.emplace_back(idx + 3);
 }
 
+void DrawList2D::addText(const vec2& pos, const std::string& text, const TextStyle& style)
+{
+	pushTexture(style.font->getTexture(style.character_size));
+
+	if (text.empty()) return;
+
+	uint32_t vertex_begin = vertices.size();
+
+	const float italicShear         = (style.italic) ? to_radian(12.f) : (radian)0.f;
+	const float underlineOffset     = style.font->getUnderlinePosition(style.character_size);
+	const float underlineThickness  = style.font->getUnderlineThickness(style.character_size);
+	const float strikeThroughOffset = style.font->getGlyph(U'x', style.character_size, style.bold).bounds.center().y;
+
+	float       whitespaceWidth = style.font->getGlyph(U' ', style.character_size, style.bold).advance;
+	const float letterSpacing   = (whitespaceWidth / 3.f) * (style.letter_spacing_factor - 1.f);
+	whitespaceWidth += letterSpacing;
+	const float lineSpacing = style.font->getLineSpacing(style.character_size) * style.line_spacing_factor;
+
+	float       x           = 0.f;
+	auto        y           = static_cast<float>(style.character_size);
+
+	auto          min_x     = static_cast<float>(style.character_size);
+	auto          min_y     = static_cast<float>(style.character_size);
+	float         max_x     = 0.f;
+	float         max_y     = 0.f;
+	std::uint32_t prevChar = 0;
+
+	for (const uint32_t curChar : text) {
+		if (curChar == U'\r') continue;
+
+		x += style.font->getKerning(prevChar, curChar, style.character_size, style.bold);
+
+		if (style.underline && (curChar == U'\n' && prevChar != U'\n'))
+			addTextLine(x, y, style.fill_color, underlineOffset, underlineThickness);
+
+		if (style.strike_through && (curChar == U'\n' && prevChar != U'\n'))
+			addTextLine(x, y, style.fill_color, strikeThroughOffset, underlineThickness);
+
+		prevChar = curChar;
+
+		if ((curChar == U' ') || (curChar == U'\n') || (curChar == U'\t')) {
+			min_x = std::min(min_x, x);
+			min_y = std::min(min_y, y);
+
+			switch (curChar) {
+				case U' ':  x += whitespaceWidth; break;
+				case U'\t': x += whitespaceWidth * 4; break;
+				case U'\n': y += lineSpacing; x = 0; break;
+			}
+
+			max_x = std::max(max_x, x);
+			max_y = std::max(max_y, y);
+
+			continue;
+		}
+
+		const Glyph& glyph = style.font->getGlyph(curChar, style.character_size, style.bold);
+
+		addGlyphQuad(vec2(x, y), style.fill_color, glyph, italicShear);
+
+		const vec2 p1 = glyph.bounds.position;
+		const vec2 p2 = glyph.bounds.position + glyph.bounds.size;
+
+		min_x = std::min(min_x, x + p1.x - italicShear * p2.y);
+		max_x = std::max(max_x, x + p2.x - italicShear * p1.y);
+		min_y = std::min(min_y, y + p1.y);
+		max_y = std::max(max_y, y + p2.y);
+
+		x += glyph.advance + letterSpacing;
+	}
+
+	if (style.underline && (x > 0))
+		addTextLine(x, y, style.fill_color, underlineOffset, underlineThickness);
+
+	if (style.strike_through && (x > 0))
+		addTextLine(x, y, style.fill_color, strikeThroughOffset, underlineThickness);
+
+	vec2 align((min_x - max_x) * style.align_h - min_x, (min_y - max_y) * style.align_v - min_y);
+
+	for (size_t i = vertex_begin; i < vertices.size(); ++i)
+		vertices[i].pos += pos + align;
+
+	popTexture();
+}
+
+void DrawList2D::addGlyphQuad(const vec2& pos, const Color& color, const Glyph& glyph, float italicShear)
+{
+	const vec2 padding(1.f, 1.f);
+
+	const vec2 p1 = glyph.bounds.position - padding;
+	const vec2 p2 = glyph.bounds.position + glyph.bounds.size + padding;
+
+	const auto uv1 = vec2(glyph.texture_rect.position) - padding;
+	const auto uv2 = vec2(glyph.texture_rect.position + glyph.texture_rect.size) + padding;
+
+	auto idx = reservePrimitives(4, 6);
+
+	vertices.emplace_back(pos + vec2(p1.x - italicShear * p1.y, p1.y), vec2{uv1.x, uv1.y}, color);
+	vertices.emplace_back(pos + vec2(p2.x - italicShear * p1.y, p1.y), vec2{uv2.x, uv1.y}, color);
+	vertices.emplace_back(pos + vec2(p1.x - italicShear * p2.y, p2.y), vec2{uv1.x, uv2.y}, color);
+	vertices.emplace_back(pos + vec2(p2.x - italicShear * p2.y, p2.y), vec2{uv2.x, uv2.y}, color);
+
+	indices.emplace_back(idx + 0);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 3);
+}
+
+void DrawList2D::addTextLine(float lineLength, float lineTop, const Color& color, float offset, float thickness, float outlineThickness)
+{
+	const float top    = std::floor(lineTop + offset - (thickness / 2) + 0.5f);
+	const float bottom = top + std::floor(thickness + 0.5f);
+
+	auto idx = reservePrimitives(4, 6);
+
+	vertices.emplace_back(vec2{-outlineThickness, top - outlineThickness}, color);
+	vertices.emplace_back(vec2{lineLength + outlineThickness, top - outlineThickness}, color);
+	vertices.emplace_back(vec2{-outlineThickness, bottom + outlineThickness}, color);
+	vertices.emplace_back(vec2{lineLength + outlineThickness, bottom + outlineThickness}, color);
+
+	indices.emplace_back(idx + 0);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 3);
+}
+
 void DrawList2D::pushTexture(const Texture& texture)
 {
+	bool new_cmd = true;
+	if (!commands.empty() && commands.back().texture == &texture) new_cmd = false;
 	texture_stack.push_back(&texture);
-	newCommand();
+
+	if (new_cmd) newCommand();
 }
 
 void DrawList2D::popTexture()
 {
+	auto* texture = texture_stack.back();
 	texture_stack.pop_back();
+
+	if (!commands.empty() && commands.back().texture == texture) return;
+
 	newCommand();
 }
 
@@ -196,8 +373,8 @@ void DrawList2D::draw(RenderTarget& target, RenderStates& states, const RenderOp
 	if (std::exchange(update_buffer, false)) {
 		vertex_buffer.resize(vertices.size());
 		index_buffer.resize(indices.size());
-		memcpy(vertex_buffer.map(), vertices.data(), vertex_buffer.size_in_byte());
-		memcpy(index_buffer.map(), indices.data(), index_buffer.size_in_byte());
+		memcpy(vertex_buffer.map(), vertices.data(), vertex_buffer.size_in_bytes());
+		memcpy(index_buffer.map(), indices.data(), index_buffer.size_in_bytes());
 		vertex_buffer.flush();
 		index_buffer.flush();
 	}
@@ -207,27 +384,35 @@ void DrawList2D::draw(RenderTarget& target, RenderStates& states, const RenderOp
 	auto offset  = vk::DeviceSize{ 0 };
 	auto fb_size = target.getFrameBufferSize();
 
-	auto& pipeline_layout = ctx.getPipeline(getPipelineUUID()).getPipelineLayout();
+	auto& pipeline_layout = ctx.getPipeline(VKDL_BUILTIN_PIPELINE0_UUID).getPipelineLayout();
 	
 	auto transform = Transform2D()
 		.translate(-1.f, -1.f)
 		.scale(2.f / fb_size.x, 2.f / fb_size.y);
 
-	states.updateRenderPassUUID(getRenderPassUUID());
+	states.updateRenderPassUUID(VKDL_BUILTIN_RENDERPASS0_UUID);
 
 	cmd.bindVertexBuffers(0, 1, &vertex_buffer.getBuffer(), &offset);
 	cmd.bindIndexBuffer(index_buffer.getBuffer(), 0, vk::IndexType::eUint32);
 	
 	for (const auto& command : commands) {
-		if (command.descriptor_set != nullptr) {
+		if (command.texture != nullptr) {
 			states.updatePipelineUUID(VKDL_BUILTIN_PIPELINE0_UUID);
 			
 			cmd.bindDescriptorSets(
 				vk::PipelineBindPoint::eGraphics,
 				pipeline_layout,
 				0,
-				1, &command.descriptor_set,
+				1, &command.texture->getDescriptorSet(),
 				0, nullptr);
+
+			auto texture_size = (vec2)command.texture->extent();
+			cmd.pushConstants(
+				pipeline_layout,
+				vk::ShaderStageFlagBits::eVertex,
+				sizeof(Transform2D),
+				sizeof(vec2),
+				&texture_size);
 		} else {
 			states.updatePipelineUUID(VKDL_BUILTIN_PIPELINE1_UUID);
 		}
@@ -243,12 +428,12 @@ void DrawList2D::draw(RenderTarget& target, RenderStates& states, const RenderOp
 			pipeline_layout, 
 			vk::ShaderStageFlagBits::eVertex, 
 			0, 
-			sizeof(Transform2D), 
+			sizeof(Transform2D),
 			&new_transform);
 		
 		states.bind(target, options);
 
-		cmd.drawIndexed(command.index_count, 1, command.index_offset, command.vertex_offset, 0);
+		cmd.drawIndexed(command.index_count, 1, command.index_offset, 0, 0);
 	}
 }
 
@@ -259,7 +444,7 @@ void DrawList2D::newCommand()
 	if (cmd->index_count != 0)
 		cmd = &commands.emplace_back();
 
-	cmd->descriptor_set = texture_stack.empty() ? nullptr : texture_stack.back()->getDescriptorSet();
+	cmd->texture        = texture_stack.empty() ? nullptr : texture_stack.back();
 	cmd->transform      = transform_stack.empty() ? Transform2D() : transform_stack.back();
 	cmd->vertex_offset  = (uint32_t)vertices.size();
 	cmd->index_offset   = (uint32_t)indices.size();
