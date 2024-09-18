@@ -22,6 +22,8 @@ public:
 		PROPERTY_GET_SET(vec2,   Position);
 		PROPERTY_GET_SET(vec2,   Scale);
 		PROPERTY_GET_SET(radian, Rotation);
+		PROPERTY_GET_SET(radian, ShearX);
+		PROPERTY_GET_SET(radian, ShearY);
 	};
 
 	VKDL_INLINE void move(float delta_x, float delta_y);
@@ -38,15 +40,21 @@ private:
 	VKDL_INLINE PROPERTY_DECL_SET(Scale);
 	VKDL_INLINE PROPERTY_DECL_GET(Rotation);
 	VKDL_INLINE PROPERTY_DECL_SET(Rotation);
+	VKDL_INLINE PROPERTY_DECL_GET(ShearX);
+	VKDL_INLINE PROPERTY_DECL_SET(ShearX);
+	VKDL_INLINE PROPERTY_DECL_GET(ShearY);
+	VKDL_INLINE PROPERTY_DECL_SET(ShearY);
 
 protected:
 	VKDL_INLINE Transform2D getTransform() const;
 
 private:
-	vec2        position;
-	vec2        origin;
-	vec2        scale;
-	radian      rotation;
+	vec2   position;
+	vec2   origin;
+	vec2   scale;
+	radian rotation;
+	radian shear_x;
+	radian shear_y;
 
 	mutable Transform2D mat;
 	mutable bool        updated;
@@ -59,6 +67,8 @@ Transformable2D::Transformable2D() :
 	origin(),
 	scale(1.f, 1.f),
 	rotation(0.f),
+	shear_x(0.f),
+	shear_y(0.f),
 	updated(true)
 {
 }
@@ -107,6 +117,28 @@ VKDL_INLINE PROPERTY_IMPL_SET(Transformable2D, Rotation)
 	updated  = false;
 }
 
+VKDL_INLINE PROPERTY_IMPL_GET(Transformable2D, ShearX)
+{
+	return shear_x;
+}
+
+VKDL_INLINE PROPERTY_IMPL_SET(Transformable2D, ShearX)
+{
+	shear_x = value;
+	updated = false;
+}
+
+VKDL_INLINE PROPERTY_IMPL_GET(Transformable2D, ShearY)
+{
+	return shear_y;
+}
+
+VKDL_INLINE PROPERTY_IMPL_SET(Transformable2D, ShearY)
+{
+	shear_y = value;
+	updated = false;
+}
+
 VKDL_INLINE void Transformable2D::move(float delta_x, float delta_y)
 {
 	position.x += delta_x;
@@ -132,6 +164,7 @@ VKDL_INLINE Transform2D Transformable2D::getTransform() const
 	if (!updated) {
 		mat = Transform2D()
 			.translate(position)
+			.shear(shear_x, shear_y)
 			.rotate(rotation)
 			.scale(scale)
 			.translate(origin);

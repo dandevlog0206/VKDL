@@ -26,6 +26,10 @@ public:
 	Transform2D& scale(float scale_x, float scale_y);
 	Transform2D& scale(const vec2& scale);
 
+	Transform2D& shear(radian rad_x, radian rad_y);
+	Transform2D& shearX(radian rad);
+	Transform2D& shearY(radian rad);
+
 	Transform2D& clear();
 
 	Transform2D& operator=(const Transform2D& rhs);

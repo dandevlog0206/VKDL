@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../core/buffer.h"
 #include "../core/drawable.h"
 #include "../math/transform_2d.h"
@@ -7,7 +9,7 @@ VKDL_BEGIN
 
 class Texture;
 class Font;
-class Glyph;
+struct Glyph;
 
 struct TextStyle
 {
@@ -46,11 +48,16 @@ public:
 	DrawList2D();
 	
 	void addRawTriangle(const Vertex2D& v0, const Vertex2D& v1, const Vertex2D& v2);
+	void addRawQuad(const Vertex2D& v0, const Vertex2D& v1, const Vertex2D& v2, const Vertex2D& v3);
 
 	void addDot(const vec2& p, float r, const Color& col);
 	void addLine(const vec2& p0, const vec2& p1, float width, const Color& col);
 	void addFilledTriangle(const vec2& p0, const vec2& p1, const vec2& p2, const Color& col);
-	
+	void addFilledCircleFan(const vec2& pos, float radius, float theta_min, float theta_max, const Color& col, uint32_t seg_count = 36);
+	void addQuad(const vec2& p0, const vec2& p1, const vec2& p2, const vec2& p3, const Color& col);
+	void addFilledRect(const vec2& pos, const vec2& size, const Color& col);
+	void addFilledRoundRect(const vec2& pos, const vec2& size, const vec4& radius, const Color& col);
+
 	void addImage(const Texture& texture, const vec2& pos, const vec2& size, const vec2& uv0, const vec2& uv1, const Color& col = Colors::White);
 	void addImage(const vec2& pos, const vec2& size, const vec2& uv0, const vec2& uv1, const Color& col = Colors::White);
 	void addImageQuad(const vec2& p0, const vec2& p1, const vec2& p2, const vec2& p3, const vec2& uv0, const vec2& uv1, const vec2& uv2, const vec2& uv3, const Color& col = Colors::White);

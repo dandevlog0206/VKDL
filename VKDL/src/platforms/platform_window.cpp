@@ -8,6 +8,8 @@ VKDL_BEGIN
 
 void PlatformWindow::render(const Drawable& drawable, const RenderOptions& options)
 {
+	if (impl->minimized) return;
+
 	if (impl->render_begin == false) {
 		auto& device = Context::get().device;
 		
@@ -31,6 +33,8 @@ void PlatformWindow::render(const Drawable& drawable, const RenderOptions& optio
 
 void PlatformWindow::display()
 {
+	if (!impl->render_begin || impl->minimized) return;
+
 	auto& ctx    = Context::get();
 	auto& device = ctx.device;
 	auto& frame  = impl->frames[impl->frame_idx];

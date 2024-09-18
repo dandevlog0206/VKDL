@@ -55,6 +55,7 @@ public:
 
 	void transitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout);
 
+	vk::SampleCountFlagBits getMaxUsableSampleCount() const;
 	vk::DeviceSize alignMemorySize(vk::DeviceSize size) const;
 	uint32_t findMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags props) const;
 

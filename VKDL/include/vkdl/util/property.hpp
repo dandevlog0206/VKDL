@@ -67,7 +67,7 @@ class __non_copyable_but {
 	struct __PROPERTY_MAKE_NAME(__prop_type, __prop_name) {                              \
 		using prop_type = __prop_type;                                                   \
 		using this_type = __PROPERTY_MAKE_NAME(__prop_type, __prop_name);                \
-		__PROPERTY_MAKE_NAME(__prop_type, __prop_name)() = default;                      \
+		__PROPERTY_MAKE_NAME(__prop_type, __prop_name)() : value() {}                    \
 		__PROPERTY_MAKE_NAME(__prop_type, __prop_name)(const this_type&) = default;      \
 		__PROPERTY_MAKE_NAME(__prop_type, __prop_name)(const prop_type& T) : value(T) {} \
 		this_type& operator=(const this_type&) = delete;                                 \
@@ -76,18 +76,18 @@ class __non_copyable_but {
 		__set_impl                                                                       \
 	private:                                                                             \
 		prop_type value;                                                                 \
-	};                                                                                   \
+	} __prop_name;                                                                       \
 	union {                                                                              \
-		__PROPERTY_MAKE_NAME(__prop_type, __prop_name) __prop_name
 
-#define __PROPERTY_DEFAULT_GET_IMPL                    \
-	operator prop_type() const { return value; }       \
-	const prop_type& get_ref() const { return value; } \
-	prop_type& get_ref() { return value; }             \
+#define __PROPERTY_DEFAULT_GET_IMPL                \
+	operator prop_type() const { return value; }   \
+	const prop_type& ref() const { return value; } \
 	prop_type get() const { return value; }
 
-#define __PROPERTY_DEFAULT_SET_IMPL                                 \
-	void operator=(const prop_type& value) { this->value = value; } \
+#define __PROPERTY_DEFAULT_SET_IMPL                                       \
+	void operator=(const prop_type& value) { this->value = value; }       \
+	void operator=(prop_type&& value) { this->value = std::move(value); } \
+	prop_type& ref() { return value; }                                    \
 	void set(const prop_type& value) { this->value = value; }
 
 #define PROPERTY_INIT(__class_name)                          \

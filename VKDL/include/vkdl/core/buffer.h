@@ -58,7 +58,7 @@ public:
 		mapped_ptr(nullptr),
 		allocated_size(0),
 		item_size(0),
-		usage(usage),
+		usage(usage | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc),
 		memory_props(memory_props),
 		sharing_mode(sharing_mode)
 	{}
@@ -103,7 +103,7 @@ public:
 	{
 		if (!empty()) clear();
 
-		this->usage        = usage;
+		this->usage        = usage | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc;
 		this->memory_props = memory_props;
 		this->sharing_mode = sharing_mode;
 	}
@@ -161,7 +161,7 @@ public:
 		VK_CHECK(Context::get().device.flushMappedMemoryRanges(1, &range));
 	}
 
-	VKDL_INLINE void resize(size_t new_size)
+	VKDL_INLINE void resize(size_t new_size, bool retain = true)
 	{
 		VKDL_CHECK(usage != vk::BufferUsageFlags(0) && memory_props != vk::MemoryPropertyFlags(0));
 
@@ -192,7 +192,8 @@ public:
 			device.bindBufferMemory(new_buffer, new_memory, 0);
 
 			if (memory != nullptr) {
-				copyBuffer(new_buffer, buffer, (vk::DeviceSize)size_in_bytes());
+				if (retain)
+					copyBuffer(new_buffer, buffer, (vk::DeviceSize)size_in_bytes());
 				device.free(std::exchange(memory, new_memory));
 			} else {
 				memory = new_memory;

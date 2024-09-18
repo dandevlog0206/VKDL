@@ -130,35 +130,35 @@ static Key virtual_key_code_to_key(WPARAM key, LPARAM flags)
 	}
 }
 
-static uint16_t* decode(uint16_t* begin, uint16_t* end, uint32_t& output, uint32_t replacement = 0)
+static uint16_t* decode(uint16_t* running, uint16_t* end, uint32_t& output, uint32_t replacement = 0)
 {
-	uint16_t first = *begin++;
+	uint16_t first = *running++;
 
 	if ((first >= 0xd800) && (first <= 0xdbff)) {
-		if (begin < end) {
-			uint32_t second = *begin++;
+		if (running < end) {
+			uint32_t second = *running++;
 			if ((second >= 0xdc00) && (second <= 0xdfff)) {
 				output = ((first - 0xd800u) << 10) + (second - 0xdc00) + 0x0010000;
 			} else {
 				output = replacement;
 			}
 		} else {
-			begin = end;
+			running = end;
 			output = replacement;
 		}
 	} else {
 		output = first;
 	}
 
-	return begin;
+	return running;
 }
 
-static uint32_t* to_utf32(uint16_t* begin, uint16_t* end, uint32_t* output)
+static uint32_t* to_utf32(uint16_t* running, uint16_t* end, uint32_t* output)
 {
-	while (begin < end)
+	while (running < end)
 	{
 		uint32_t codepoint;
-		begin = decode(begin, end, codepoint);
+		running = decode(running, end, codepoint);
 		*output++ = codepoint;
 	}
 

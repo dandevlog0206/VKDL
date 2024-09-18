@@ -399,7 +399,7 @@ public:
 		closure.bind_method(static_cast<const Class*>(obj), to_bind);
 	}
 
-	template <class Lambda, class _Ret, class...Args, std::enable_if_t<!std::is_same_v<Lambda, Delegate<_Ret(Args...)>>, int> = 0>
+	template <class Lambda, class...Args, std::enable_if_t<!std::is_same_v<Lambda, Delegate<Ret(Args...)>>, int> = 0>
 	DEL_INLINE Delegate(Lambda&& lambda) {
 		bind(std::forward<Lambda>(lambda));
 	}
@@ -422,7 +422,7 @@ public:
 	}
 
 	DEL_INLINE Delegate& operator=(Delegate&& rhs) noexcept {
-		closure.move_from(std::move(rhs.closure));
+		closure.move_from(rhs.closure);
 		return *this;
 	}
 
@@ -431,7 +431,7 @@ public:
 		return *this;
 	}
 
-	template <class Lambda, class _Ret, class...Args, std::enable_if_t<!std::is_same_v<Lambda, Delegate<_Ret(Args...)>>, int> = 0>
+	template <class Lambda, class...Args, std::enable_if_t<!std::is_same_v<Lambda, Delegate<Ret(Args...)>>, int> = 0>
 	DEL_INLINE Delegate& operator=(Lambda&& lambda) {
 		bind(std::forward<Lambda>(lambda));
 		return *this;
@@ -451,7 +451,7 @@ public:
 		closure.bind_method(static_cast<const Class*>(pthis), function_to_bind);
 	}
 
-	template <class Lambda, class _Ret, class...Args, std::enable_if_t<!std::is_same_v<Lambda, Delegate<_Ret(Args...)>>, int> = 0>
+	template <class Lambda, class...Args, std::enable_if_t<!std::is_same_v<Lambda, Delegate<Ret(Args...)>>, int> = 0>
 	DEL_INLINE void bind(Lambda&& lambda) {
 		if constexpr (std::is_convertible_v<Lambda, Ret(*)(Args...)>)
 			closure.bind_static((Ret(*)(Args...))lambda);

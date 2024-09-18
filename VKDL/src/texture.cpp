@@ -304,6 +304,8 @@ void Texture::resize(uint32_t width, uint32_t height)
 
 	auto& ctx    = Context::get();
 	auto& device = ctx.device;
+	
+	auto prev_extent = info.image_info.extent;
 
 	info.image_info.extent.width  = width;
 	info.image_info.extent.height = height;
@@ -332,7 +334,14 @@ void Texture::resize(uint32_t width, uint32_t height)
 	image_copy.srcOffset      = vk::Offset3D{};
 	image_copy.dstSubresource = vk::ImageSubresourceLayers{ vk::ImageAspectFlagBits::eColor, info.image_info.mipLevels - 1, 0, 1 };
 	image_copy.dstOffset      = vk::Offset3D{};
-	image_copy.extent         = info.image_info.extent;
+	image_copy.extent         = prev_extent;
+
+	cmd.copyImage(
+		image,
+		vk::ImageLayout::eTransferSrcOptimal,
+		new_image,
+		vk::ImageLayout::eTransferDstOptimal,
+		1, &image_copy);
 
 	ctx.transitionImageLayout(
 		cmd,

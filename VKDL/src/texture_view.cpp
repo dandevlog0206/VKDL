@@ -1,7 +1,5 @@
 #include "../include/vkdl/graphics/texture_view.h"
 
-#include "../include/vkdl/core/render_target.h"
-#include "../include/vkdl/core/render_states.h"
 #include "../include/vkdl/core/builtin_objects.h"
 
 VKDL_BEGIN

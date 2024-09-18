@@ -1,17 +1,15 @@
 #pragma once
 
-#include "config.h"
-#include "../util/uuid.h"
+#include "render_target.h"
+#include "render_states.h"
 
 VKDL_BEGIN
-
-class RenderTarget;
-class RenderStates;
-class RenderOptions;
 
 class Drawable
 {
 public:
+	virtual ~Drawable() {};
+
 	virtual void draw(RenderTarget& target, RenderStates& states, const RenderOptions& options) const = 0;
 };
 

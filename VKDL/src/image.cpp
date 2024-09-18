@@ -83,8 +83,8 @@ ColorImage ColorImage::blit(const uvec2& offset, const uvec2& size) const
 	size_t stride = size.x * sizeof(Color);
 
 	for (uint32_t h = 0; h < size.y; ++h) {
-		const Color* begin = &at(offset.x, offset.y + h);
-		memcpy(&new_image.at(0, h), begin, stride);
+		const Color* running = &at(offset.x, offset.y + h);
+		memcpy(&new_image.at(0, h), running, stride);
 	}
 
 	return new_image;

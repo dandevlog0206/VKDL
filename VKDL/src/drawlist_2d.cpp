@@ -1,8 +1,6 @@
 #include "../include/vkdl/graphics/drawlist_2d.h"
 
 #include "../include/vkdl/core/context.h"
-#include "../include/vkdl/core/render_target.h"
-#include "../include/vkdl/core/render_states.h"
 #include "../include/vkdl/core/builtin_objects.h"
 #include "../include/vkdl/graphics/texture.h"
 #include "../include/vkdl/graphics/font.h"
@@ -40,6 +38,23 @@ void DrawList2D::addRawTriangle(const Vertex2D& v0, const Vertex2D& v1, const Ve
 	indices.emplace_back(idx + 0);
 	indices.emplace_back(idx + 1);
 	indices.emplace_back(idx + 2);
+}
+
+void DrawList2D::addRawQuad(const Vertex2D& v0, const Vertex2D& v1, const Vertex2D& v2, const Vertex2D& v3)
+{
+	auto idx = reservePrimitives(4, 6);
+
+	vertices.emplace_back(v0);
+	vertices.emplace_back(v1);
+	vertices.emplace_back(v2);
+	vertices.emplace_back(v3);
+
+	indices.emplace_back(idx + 0);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 3);
+	indices.emplace_back(idx + 0);
 }
 
 void DrawList2D::addDot(const vec2& p, float r, const Color& col)
@@ -94,6 +109,72 @@ void DrawList2D::addFilledTriangle(const vec2& p0, const vec2& p1, const vec2& p
 	indices.emplace_back(idx + 2);
 }
 
+void DrawList2D::addFilledCircleFan(const vec2& pos, float radius, float theta_min, float theta_max, const Color& col, uint32_t seg_count)
+{
+	auto idx = reservePrimitives(seg_count + 1, 3 * seg_count);
+
+	vertices.emplace_back(pos, col);
+	for (uint32_t i = 0; i <= seg_count; ++i) {
+		float theta = (theta_max - theta_min) * i / seg_count + theta_min;
+		vertices.emplace_back(pos + radius * vec2(cosf(theta), sinf(theta)), col);
+	}
+
+	for (uint32_t i = 1; i <= seg_count; ++i) {
+		indices.emplace_back(idx);
+		indices.emplace_back(idx + i);
+		indices.emplace_back(idx + i + 1);
+	}
+}
+
+void DrawList2D::addQuad(const vec2& p0, const vec2& p1, const vec2& p2, const vec2& p3, const Color& col)
+{
+	auto idx = reservePrimitives(4, 6);
+
+	vertices.emplace_back(p0, col);
+	vertices.emplace_back(p1, col);
+	vertices.emplace_back(p2, col);
+	vertices.emplace_back(p3, col);
+
+	indices.emplace_back(idx + 0);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 3);
+	indices.emplace_back(idx + 0);
+}
+
+void DrawList2D::addFilledRect(const vec2& pos, const vec2& size, const Color& col)
+{
+	auto idx = reservePrimitives(4, 6);
+
+	vertices.emplace_back(pos, col);
+	vertices.emplace_back(pos + vec2(size.x, 0), col);
+	vertices.emplace_back(pos + size, col);
+	vertices.emplace_back(pos + vec2(0, size.y), col);
+
+	indices.emplace_back(idx + 0);
+	indices.emplace_back(idx + 1);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 2);
+	indices.emplace_back(idx + 3);
+	indices.emplace_back(idx + 0);
+}
+
+void DrawList2D::addFilledRoundRect(const vec2& pos, const vec2& size, const vec4& radius, const Color& col)
+{
+	addFilledCircleFan(pos + vec2(radius[0]), radius[0], to_radian(180), to_radian(270), col);
+	addFilledCircleFan(pos + vec2(size.x - radius[1], radius[1]), radius[1], to_radian(270), to_radian(360), col);
+	addFilledCircleFan(pos + size - vec2(radius[2]), radius[2], to_radian(0), to_radian(90), col);
+	addFilledCircleFan(pos + vec2(radius[3], size.y - radius[3]), radius[3], to_radian(90), to_radian(180), col);
+
+	addFilledRect(pos + vec2(radius[0], 0), vec2(size.x - radius[0] - radius[1], radius[0]), col);
+	addFilledRect(pos + vec2(size.x - radius[1], radius[1]), vec2(radius[1], size.y - radius[1] - radius[2]), col);
+	addFilledRect(pos + vec2(radius[3], size.y - radius[2]), vec2(size.x - radius[2] - radius[3], radius[2]), col);
+	addFilledRect(pos + vec2(0, radius[0]), vec2(radius[3], size.y - radius[0] - radius[3]), col);
+
+	addFilledRect(pos + vec2(radius[3], radius[0]), size - vec2(radius[1] + radius[3], radius[0] + radius[2]), col);
+}
+
 void DrawList2D::addImage(const Texture& texture, const vec2& pos, const vec2& size, const vec2& uv0, const vec2& uv1, const Color& col)
 {
 	pushTexture(texture);
@@ -141,7 +222,7 @@ void DrawList2D::addText(const vec2& pos, const std::string& text, const TextSty
 
 	if (text.empty()) return;
 
-	uint32_t vertex_begin = vertices.size();
+	size_t vertex_begin = vertices.size();
 
 	const float italicShear         = (style.italic) ? to_radian(12.f) : (radian)0.f;
 	const float underlineOffset     = style.font->getUnderlinePosition(style.character_size);
@@ -153,14 +234,14 @@ void DrawList2D::addText(const vec2& pos, const std::string& text, const TextSty
 	whitespaceWidth += letterSpacing;
 	const float lineSpacing = style.font->getLineSpacing(style.character_size) * style.line_spacing_factor;
 
-	float       x           = 0.f;
-	auto        y           = static_cast<float>(style.character_size);
+	float    x         = 0.f;
+	auto     y         = static_cast<float>(style.character_size);
 
-	auto          min_x     = static_cast<float>(style.character_size);
-	auto          min_y     = static_cast<float>(style.character_size);
-	float         max_x     = 0.f;
-	float         max_y     = 0.f;
-	std::uint32_t prevChar = 0;
+	auto     min_x     = static_cast<float>(style.character_size);
+	auto     min_y     = static_cast<float>(style.character_size);
+	float    max_x     = 0.f;
+	float    max_y     = 0.f;
+	uint32_t prevChar = 0;
 
 	for (const uint32_t curChar : text) {
 		if (curChar == U'\r') continue;
@@ -359,9 +440,7 @@ void DrawList2D::clear()
 	clip_rect_stack.clear();
 	transform_stack.clear();
 
-	vertex_buffer.clear();
-	index_buffer.clear();
-	update_buffer = false;
+	update_buffer = true;
 
 	commands.emplace_back();
 }
@@ -369,10 +448,11 @@ void DrawList2D::clear()
 void DrawList2D::draw(RenderTarget& target, RenderStates& states, const RenderOptions& options) const
 {
 	if (commands.empty()) return;
+	if (commands.front().index_count == 0) return;
 
 	if (std::exchange(update_buffer, false)) {
-		vertex_buffer.resize(vertices.size());
-		index_buffer.resize(indices.size());
+		vertex_buffer.resize(vertices.size(), false);
+		index_buffer.resize(indices.size(), false);
 		memcpy(vertex_buffer.map(), vertices.data(), vertex_buffer.size_in_bytes());
 		memcpy(index_buffer.map(), indices.data(), index_buffer.size_in_bytes());
 		vertex_buffer.flush();

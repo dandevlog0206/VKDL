@@ -92,6 +92,41 @@ Transform2D& Transform2D::scale(const vec2& scale)
 	return Transform2D::scale(scale.x, scale.y);
 }
 
+Transform2D& Transform2D::shear(radian rad_x, radian rad_y)
+{
+	auto t_x = tanf(rad_x);
+	auto t_y = tanf(rad_y);
+
+	mat[1][0] += t_x * mat[0][0];
+	mat[1][1] += t_x * mat[0][1];
+	mat[1][2] += t_x * mat[0][2];
+	mat[0][0] += t_y * mat[1][0];
+	mat[0][1] += t_y * mat[1][1];
+	mat[0][2] += t_y * mat[1][2];
+
+	return *this;
+}
+
+Transform2D& Transform2D::shearX(radian rad)
+{
+	auto t = tanf(rad);
+	mat[1][0] += t * mat[0][0];
+	mat[1][1] += t * mat[0][1];
+	mat[1][2] += t * mat[0][2];
+
+	return *this;
+}
+
+Transform2D& Transform2D::shearY(radian rad)
+{
+	auto t = tanf(rad);
+	mat[0][0] += t * mat[1][0];
+	mat[0][1] += t * mat[1][1];
+	mat[0][2] += t * mat[1][2];
+
+	return *this;
+}
+
 Transform2D& Transform2D::clear()
 {
 	mat = mat3x4(1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
